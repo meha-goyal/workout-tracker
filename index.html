@@ -1622,23 +1622,24 @@
       return json.record || {};
     }
 
-    // Look up this user's bin ID from JSONBin by searching for their named bin
+    // Look up this user's bin ID from JSONBin by searching uncategorized bins
+    // Correct endpoint: GET /v3/c/uncategorized/bins
+    // Response format: [ { record: "<BIN_ID>", snippetMeta: { name: "..." }, ... } ]
     async function lookupBinId() {
-      const res = await fetch('https://api.jsonbin.io/v3/b?sortBy=createdAt&sortOrder=desc', {
-        headers: { 'X-Master-Key': JSONBIN_API_KEY }
+      const res = await fetch('https://api.jsonbin.io/v3/c/uncategorized/bins', {
+        headers: {
+          'X-Master-Key': JSONBIN_API_KEY,
+          'X-Sort-Order': 'descending'
+        }
       });
       const json = await res.json();
-      console.log('JSONBin list response:', JSON.stringify(json).slice(0, 300));
-      // JSONBin returns { result: [ { record: {...}, metadata: { id, name, ... } } ] }
-      const bins = json.result || json || [];
+      console.log('JSONBin list response:', JSON.stringify(json).slice(0, 400));
+      const bins = Array.isArray(json) ? json : [];
       const targetName = `workout-${currentUserId}`;
-      const match = bins.find(b =>
-        b.metadata?.name === targetName ||
-        b.snippetMeta?.name === targetName ||
-        b.name === targetName
-      );
-      console.log('Looking for bin named:', targetName, '— found:', match?.metadata?.id || match?.id || null);
-      return match?.metadata?.id || match?.id || null;
+      const match = bins.find(b => b.snippetMeta?.name === targetName);
+      const foundId = match?.record || null;
+      console.log('Looking for bin named:', targetName, '— found:', foundId);
+      return foundId;
     }
 
     async function loadAll() {
