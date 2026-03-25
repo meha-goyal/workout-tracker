@@ -1585,7 +1585,7 @@
     }
 
     // --- JSONBin helpers ---
-    // To upgrade to Firebase: replace createBin, updateBin, fetchBin with Firebase equivalents.
+    // To upgrade to Firebase: replace createBin, updateBin, fetchBin, findBin with Firebase equivalents.
     // loadAll() and saveAll() stay exactly the same.
 
     async function createBin(data) {
@@ -1622,26 +1622,61 @@
       return json.record || {};
     }
 
-    // --- Core load / save ---
+    // Look up this user's bin ID from JSONBin by searching for their named bin
+    async function lookupBinId() {
+      const res = await fetch('https://api.jsonbin.io/v3/b?sortBy=createdAt&sortOrder=desc', {
+        headers: { 'X-Master-Key': JSONBIN_API_KEY }
+      });
+      const json = await res.json();
+      console.log('JSONBin list response:', JSON.stringify(json).slice(0, 300));
+      // JSONBin returns { result: [ { record: {...}, metadata: { id, name, ... } } ] }
+      const bins = json.result || json || [];
+      const targetName = `workout-${currentUserId}`;
+      const match = bins.find(b =>
+        b.metadata?.name === targetName ||
+        b.snippetMeta?.name === targetName ||
+        b.name === targetName
+      );
+      console.log('Looking for bin named:', targetName, '— found:', match?.metadata?.id || match?.id || null);
+      return match?.metadata?.id || match?.id || null;
+    }
 
     async function loadAll() {
       const localKey = getUserLocalKey();
-      const binId = getUserBinId();
+      let binId = getUserBinId();
+      console.log('loadAll — user:', currentUserId, '| cached binId:', binId);
 
-      // Show this user's cached local data instantly
+      // Show this user's cached local data instantly while we fetch remote
       try {
         const local = JSON.parse(localStorage.getItem(localKey) || '{}');
         applyData(local);
       } catch (e) {}
 
-      // Then fetch their remote data and overwrite
+      // If no bin ID cached locally (new device), look it up from JSONBin by name
+      if (!binId) {
+        console.log('No local bin ID — searching JSONBin by name...');
+        try {
+          binId = await lookupBinId();
+          if (binId) {
+            setUserBinId(binId);
+            console.log('Found and cached bin ID:', binId);
+          } else {
+            console.log('No existing bin found — this is a fresh tracker.');
+          }
+        } catch (e) {
+          console.warn('Could not look up bin ID:', e);
+        }
+      }
+
+      // Fetch remote data and overwrite local
       if (binId) {
         try {
           const remote = await fetchBin(binId);
+          console.log('Remote data loaded:', Object.keys(remote).length, 'keys');
           applyData(remote);
           localStorage.setItem(localKey, JSON.stringify(remote));
         } catch (e) {
-          console.warn('Could not reach JSONBin, showing cached data.');
+          console.warn('Could not reach JSONBin, showing cached data:', e);
         }
       }
     }
@@ -1650,6 +1685,7 @@
       const data = collectData();
       const localKey = getUserLocalKey();
       let binId = getUserBinId();
+      console.log('saveAll — user:', currentUserId, '| binId:', binId, '| keys:', Object.keys(data).length);
 
       // Always cache locally first
       try { localStorage.setItem(localKey, JSON.stringify(data)); } catch (e) {}
@@ -1657,13 +1693,19 @@
       // Push to this user's JSONBin
       try {
         if (!binId) {
+          console.log('No bin yet — creating new bin...');
           binId = await createBin(data);
-          if (binId) setUserBinId(binId);
+          if (binId) {
+            setUserBinId(binId);
+            console.log('Created new bin:', binId);
+          }
         } else {
           await updateBin(binId, data);
+          console.log('Updated bin:', binId);
         }
         flash('Saved!');
       } catch (e) {
+        console.error('JSONBin save failed:', e);
         flash('Saved locally');
       }
     }
