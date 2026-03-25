@@ -1216,51 +1216,6 @@
         gap: 8px;
       }
     }
-
-    /* Inline weight/reps inputs */
-    .ex-inputs {
-      display: flex;
-      gap: 4px;
-      flex-shrink: 0;
-      align-items: center;
-      margin-right: 4px;
-    }
-    .ex-input-wrap {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 2px;
-    }
-    .ex-input-label {
-      font-size: 8px;
-      font-weight: 600;
-      letter-spacing: .06em;
-      text-transform: uppercase;
-      color: #C4C2B9;
-    }
-    .ex-input {
-      width: 46px;
-      height: 26px;
-      border: 0.5px solid #D3D1C7;
-      border-radius: 6px;
-      background: #F8F7F4;
-      font-family: 'DM Mono', monospace;
-      font-size: 10px;
-      color: #1C1C1A;
-      text-align: center;
-      padding: 0 3px;
-      outline: none;
-      transition: border-color .15s, background .15s;
-      /* prevent drag from firing on input interaction */
-      cursor: text;
-    }
-    .ex-input:focus {
-      border-color: #7F77DD;
-      background: #fff;
-    }
-    .ex-input::placeholder {
-      color: #D3D1C7;
-    }
   </style>
 </head>
 
@@ -1515,11 +1470,20 @@
       </div>
     </div>
 
-    <div class="tracker-actions" style="margin-top:16px;margin-bottom:8px;">
-      <button class="clear-btn" onclick="clearAll()">Clear all</button>
-      <button class="save-btn" onclick="saveAll()">Save</button>
+    <!-- Tracker -->
+    <div class="tracker-section">
+      <div class="tracker-header">
+        <div class="tracker-title">My weights &amp; reps</div>
+        <div class="tracker-sub">Synced across devices via JSONBin</div>
+      </div>
+      <div class="rule"></div>
+      <div class="tracker-days" id="tracker-days"></div>
+      <div class="tracker-actions">
+        <button class="clear-btn" onclick="clearAll()">Clear all</button>
+        <button class="save-btn" onclick="saveAll()">Save</button>
+      </div>
+      <div class="save-confirm" id="save-confirm">Saved!</div>
     </div>
-    <div class="save-confirm" id="save-confirm">Saved!</div>
 
   </div><!-- end main-content -->
 
@@ -1840,24 +1804,11 @@
         row.className = 'ex-row';
         row.draggable = true;
         row.dataset.exId = ex.id;
-        const wKey = `${dayId}-${ex.id}-w`;
-        const rKey = `${dayId}-${ex.id}-r`;
-        const wPlaceholder = ex.tag === 'pull' && ex.name.toLowerCase().includes('pull-up') ? 'assist' : (ex.tag === 'core' ? '—' : 'lb');
         row.innerHTML = `
         <span class="drag-handle" title="Drag to reorder">⠿</span>
         <div class="ex-info">
           <div class="ex-name">${esc(ex.name)}</div>
           <div class="ex-sets">${esc(ex.sets)}</div>
-        </div>
-        <div class="ex-inputs">
-          <div class="ex-input-wrap">
-            <span class="ex-input-label">${wPlaceholder === '—' ? '—' : wPlaceholder}</span>
-            <input class="ex-input" type="text" placeholder="—" data-tkey="${wKey}" value="${esc(trackerData[wKey] || '')}">
-          </div>
-          <div class="ex-input-wrap">
-            <span class="ex-input-label">reps</span>
-            <input class="ex-input" type="text" placeholder="—" data-tkey="${rKey}" value="${esc(trackerData[rKey] || '')}">
-          </div>
         </div>
         <span class="tag tag-${ex.tag}">${ex.tag}</span>
         <div class="ex-actions">
@@ -1865,13 +1816,7 @@
           <button class="ex-btn" onclick="moveEx('${dayId}','${ex.id}',1)" title="Move down">↓</button>
           <button class="ex-btn" onclick="removeEx('${dayId}','${ex.id}')" title="Remove">×</button>
         </div>
-      \`;
-
-        // Wire inline inputs to trackerData
-        row.querySelectorAll('[data-tkey]').forEach(inp => {
-          inp.addEventListener('mousedown', e => e.stopPropagation());
-          inp.addEventListener('input', () => { trackerData[inp.dataset.tkey] = inp.value.trim(); });
-        });
+      `;
 
         // Drag events
         row.addEventListener('dragstart', e => { dragSrcEl = row; row.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move'; });
@@ -1901,8 +1846,46 @@
     }
 
     function renderTracker() {
-      // Tracker is now inline in the plan cards — re-render exercises to refresh input values
-      plan.forEach(day => renderExercises(day.id));
+      const container = document.getElementById('tracker-days');
+      container.innerHTML = '';
+      container.style.gridTemplateColumns = `repeat(${Math.min(plan.length, 3)}, 1fr)`;
+
+      plan.forEach(day => {
+        const div = document.createElement('div');
+        div.className = 'tracker-day';
+        div.innerHTML = `
+        <div class="tracker-day-header">
+          <div class="tracker-day-label">${esc(day.label)}</div>
+          <div class="tracker-day-title">${esc(day.title)}</div>
+        </div>
+        <div class="tracker-col-labels">
+          <div class="tracker-col-label">Exercise</div>
+          <div class="tracker-col-label">Weight</div>
+          <div class="tracker-col-label">Reps</div>
+        </div>
+        <div class="tracker-rows" id="trows-${day.id}"></div>
+      `;
+        container.appendChild(div);
+
+        const rows = div.querySelector(`#trows-${day.id}`);
+        day.exercises.forEach(ex => {
+          const wKey = `${day.id}-${ex.id}-w`;
+          const rKey = `${day.id}-${ex.id}-r`;
+          const row = document.createElement('div');
+          row.className = 'tracker-row';
+          row.innerHTML = `
+          <div class="tracker-ex-name" title="${esc(ex.name)}">${esc(ex.name)}</div>
+          <input class="tracker-input" type="text" placeholder="lb" value="${esc(trackerData[wKey] || '')}" data-tkey="${wKey}">
+          <input class="tracker-input" type="text" placeholder="reps" value="${esc(trackerData[rKey] || '')}" data-tkey="${rKey}">
+        `;
+          rows.appendChild(row);
+        });
+      });
+
+      // Listen for tracker input changes
+      container.querySelectorAll('[data-tkey]').forEach(inp => {
+        inp.addEventListener('input', () => { trackerData[inp.dataset.tkey] = inp.value.trim(); });
+      });
     }
 
     function applyMilestoneData() {
