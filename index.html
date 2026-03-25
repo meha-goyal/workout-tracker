@@ -8,6 +8,7 @@
   <link
     href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap"
     rel="stylesheet">
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
   <style>
     *,
     *::before,
@@ -121,7 +122,7 @@
     .ex {
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 10px;
       padding: 8px 14px;
       border-bottom: 0.5px solid #F1EFE8;
     }
@@ -210,53 +211,6 @@
     .tag-glutes {
       background: #FBEAF0;
       color: #72243E;
-    }
-
-    /* Inline weight/reps inputs inside exercise rows */
-    .ex-inputs {
-      display: flex;
-      gap: 4px;
-      flex-shrink: 0;
-      align-items: center;
-    }
-
-    .ex-input-wrap {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 2px;
-    }
-
-    .ex-input-label {
-      font-size: 8px;
-      font-weight: 600;
-      letter-spacing: .06em;
-      text-transform: uppercase;
-      color: #C4C2B9;
-    }
-
-    .ex-input {
-      width: 48px;
-      height: 26px;
-      border: 0.5px solid #D3D1C7;
-      border-radius: 6px;
-      background: #F8F7F4;
-      font-family: 'DM Mono', monospace;
-      font-size: 10px;
-      color: #1C1C1A;
-      text-align: center;
-      padding: 0 3px;
-      outline: none;
-      transition: border-color .15s, background .15s;
-    }
-
-    .ex-input:focus {
-      border-color: #7F77DD;
-      background: #fff;
-    }
-
-    .ex-input::placeholder {
-      color: #D3D1C7;
     }
 
     /* Stats row */
@@ -744,8 +698,7 @@
       align-items: center;
       justify-content: center;
       gap: 12px;
-      margin-top: 12px;
-      margin-bottom: 24px;
+      margin-top: 20px;
     }
 
     .save-btn {
@@ -875,17 +828,147 @@
         gap: 4px;
       }
     }
+
+    /* Login overlay */
+    #login-overlay {
+      position: fixed;
+      inset: 0;
+      background: #F8F7F4;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+    }
+
+    #login-overlay.hidden {
+      display: none;
+    }
+
+    .login-card {
+      background: #fff;
+      border: 0.5px solid #D3D1C7;
+      border-radius: 16px;
+      padding: 40px 36px;
+      text-align: center;
+      max-width: 340px;
+      width: 100%;
+    }
+
+    .login-title {
+      font-size: 20px;
+      font-weight: 600;
+      letter-spacing: -0.3px;
+      color: #1C1C1A;
+      margin-bottom: 6px;
+    }
+
+    .login-sub {
+      font-size: 13px;
+      color: #888780;
+      margin-bottom: 28px;
+      line-height: 1.5;
+    }
+
+    .login-error {
+      font-size: 12px;
+      color: #c0392b;
+      margin-top: 16px;
+      min-height: 18px;
+    }
+
+    /* Sign-out button in header */
+    .signout-btn {
+      font-size: 12px;
+      color: #B4B2A9;
+      background: none;
+      border: 0.5px solid #D3D1C7;
+      border-radius: 6px;
+      padding: 5px 12px;
+      cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+      transition: color .15s, border-color .15s;
+    }
+
+    .signout-btn:hover {
+      color: #888780;
+      border-color: #B4B2A9;
+    }
+
+    /* Inline weight/reps inputs */
+    .ex-inputs {
+      display: flex;
+      gap: 4px;
+      flex-shrink: 0;
+      align-items: center;
+    }
+
+    .ex-input-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+    }
+
+    .ex-input-label {
+      font-size: 8px;
+      font-weight: 600;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      color: #C4C2B9;
+    }
+
+    .ex-input {
+      width: 46px;
+      height: 26px;
+      border: 0.5px solid #D3D1C7;
+      border-radius: 6px;
+      background: #F8F7F4;
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      color: #1C1C1A;
+      text-align: center;
+      padding: 0 3px;
+      outline: none;
+      transition: border-color .15s, background .15s;
+    }
+
+    .ex-input:focus {
+      border-color: #7F77DD;
+      background: #fff;
+    }
+
+    .ex-input::placeholder {
+      color: #D3D1C7;
+    }
   </style>
 </head>
 
 <body>
-  <div class="page">
+
+  <!-- Login overlay -->
+  <div id="login-overlay">
+    <div class="login-card">
+      <div class="login-title">Full Body Recomposition</div>
+      <div class="login-sub">Sign in with your Google account to access your tracker.</div>
+      <div id="g_id_onload" data-client_id="1020381899617-cnfd6dob9ntib04fegbbbli64gp9kh6t.apps.googleusercontent.com"
+        data-callback="handleCredential" data-auto_prompt="true">
+      </div>
+      <div class="g_id_signin" data-type="standard" data-shape="rectangular" data-theme="outline"
+        data-text="sign_in_with" data-size="large" data-logo_alignment="left">
+      </div>
+      <div class="login-error" id="login-error"></div>
+    </div>
+  </div>
+
+  <div class="page" id="main-content" style="display:none">
 
     <div class="header">
       <div class="header-top">
         <div class="title">Full Body Recomposition Plan</div>
-        <div class="subtitle">3 days per week &nbsp;·&nbsp; 7 exercises &nbsp;·&nbsp; ~1 hour &nbsp;·&nbsp; log weight
-          &amp; reps inline</div>
+        <div style="display:flex;align-items:center;gap:12px">
+          <div class="subtitle">3 days per week &nbsp;·&nbsp; 7 exercises &nbsp;·&nbsp; ~1 hour</div>
+          <button class="signout-btn" onclick="signOut()">Sign out</button>
+        </div>
       </div>
       <div class="rule"></div>
     </div>
@@ -911,8 +994,7 @@
                   placeholder="—" data-key="d1-barbell-squat-w"></div>
               <div class="ex-input-wrap"><span class="ex-input-label">reps</span><input class="ex-input" type="text"
                   placeholder="—" data-key="d1-barbell-squat-r"></div>
-            </div>
-            <span class="tag tag-legs">Legs</span>
+            </div><span class="tag tag-legs">Legs</span>
           </div>
           <div class="ex">
             <div class="num">2</div>
@@ -926,7 +1008,12 @@
               <div class="ex-input-wrap"><span class="ex-input-label">reps</span><input class="ex-input" type="text"
                   placeholder="—" data-key="d1-rdl-r"></div>
             </div>
-            <span class="tag tag-legs">Legs</span>
+            <div class="ex-inputs">
+              <div class="ex-input-wrap"><span class="ex-input-label">lb</span><input class="ex-input" type="text"
+                  placeholder="—" data-key="d3-rdl-w"></div>
+              <div class="ex-input-wrap"><span class="ex-input-label">reps</span><input class="ex-input" type="text"
+                  placeholder="—" data-key="d3-rdl-r"></div>
+            </div><span class="tag tag-legs">Legs</span>
           </div>
           <div class="ex divider-above">
             <div class="num">3</div>
@@ -939,8 +1026,7 @@
                   placeholder="—" data-key="d1-incline-w"></div>
               <div class="ex-input-wrap"><span class="ex-input-label">reps</span><input class="ex-input" type="text"
                   placeholder="—" data-key="d1-incline-r"></div>
-            </div>
-            <span class="tag tag-push">Push</span>
+            </div><span class="tag tag-push">Push</span>
           </div>
           <div class="ex">
             <div class="num">4</div>
@@ -954,7 +1040,12 @@
               <div class="ex-input-wrap"><span class="ex-input-label">reps</span><input class="ex-input" type="text"
                   placeholder="—" data-key="d1-pullup-r"></div>
             </div>
-            <span class="tag tag-pull">Pull</span>
+            <div class="ex-inputs">
+              <div class="ex-input-wrap"><span class="ex-input-label">assist</span><input class="ex-input" type="text"
+                  placeholder="—" data-key="d3-pullup-w"></div>
+              <div class="ex-input-wrap"><span class="ex-input-label">reps</span><input class="ex-input" type="text"
+                  placeholder="—" data-key="d3-pullup-r"></div>
+            </div><span class="tag tag-pull">Pull</span>
           </div>
           <div class="ex divider-above">
             <div class="num">5</div>
@@ -968,7 +1059,12 @@
               <div class="ex-input-wrap"><span class="ex-input-label">reps</span><input class="ex-input" type="text"
                   placeholder="—" data-key="d1-rdf-r"></div>
             </div>
-            <span class="tag tag-shoulder">Shoulder</span>
+            <div class="ex-inputs">
+              <div class="ex-input-wrap"><span class="ex-input-label">lb</span><input class="ex-input" type="text"
+                  placeholder="—" data-key="d3-rdf-w"></div>
+              <div class="ex-input-wrap"><span class="ex-input-label">reps</span><input class="ex-input" type="text"
+                  placeholder="—" data-key="d3-rdf-r"></div>
+            </div><span class="tag tag-shoulder">Shoulder</span>
           </div>
           <div class="ex">
             <div class="num">6</div>
@@ -982,7 +1078,18 @@
               <div class="ex-input-wrap"><span class="ex-input-label">reps</span><input class="ex-input" type="text"
                   placeholder="—" data-key="d1-lat-r"></div>
             </div>
-            <span class="tag tag-shoulder">Shoulder</span>
+            <div class="ex-inputs">
+              <div class="ex-input-wrap"><span class="ex-input-label">lb</span><input class="ex-input" type="text"
+                  placeholder="—" data-key="d2-lat-w"></div>
+              <div class="ex-input-wrap"><span class="ex-input-label">reps</span><input class="ex-input" type="text"
+                  placeholder="—" data-key="d2-lat-r"></div>
+            </div>
+            <div class="ex-inputs">
+              <div class="ex-input-wrap"><span class="ex-input-label">lb</span><input class="ex-input" type="text"
+                  placeholder="—" data-key="d3-lat-w"></div>
+              <div class="ex-input-wrap"><span class="ex-input-label">reps</span><input class="ex-input" type="text"
+                  placeholder="—" data-key="d3-lat-r"></div>
+            </div><span class="tag tag-shoulder">Shoulder</span>
           </div>
           <div class="ex">
             <div class="num">7</div>
@@ -991,12 +1098,11 @@
               <div class="ex-sets">3 × 12–15</div>
             </div>
             <div class="ex-inputs">
-              <div class="ex-input-wrap"><span class="ex-input-label">lb</span><input class="ex-input" type="text"
+              <div class="ex-input-wrap"><span class="ex-input-label">—</span><input class="ex-input" type="text"
                   placeholder="—" data-key="d1-legraise-w"></div>
               <div class="ex-input-wrap"><span class="ex-input-label">reps</span><input class="ex-input" type="text"
                   placeholder="—" data-key="d1-legraise-r"></div>
-            </div>
-            <span class="tag tag-core">Core</span>
+            </div><span class="tag tag-core">Core</span>
           </div>
         </div>
       </div>
@@ -1020,8 +1126,7 @@
                   placeholder="—" data-key="d2-bench-w"></div>
               <div class="ex-input-wrap"><span class="ex-input-label">reps</span><input class="ex-input" type="text"
                   placeholder="—" data-key="d2-bench-r"></div>
-            </div>
-            <span class="tag tag-push">Push</span>
+            </div><span class="tag tag-push">Push</span>
           </div>
           <div class="ex">
             <div class="num">2</div>
@@ -1034,8 +1139,7 @@
                   placeholder="—" data-key="d2-ohp-w"></div>
               <div class="ex-input-wrap"><span class="ex-input-label">reps</span><input class="ex-input" type="text"
                   placeholder="—" data-key="d2-ohp-r"></div>
-            </div>
-            <span class="tag tag-push">Push</span>
+            </div><span class="tag tag-push">Push</span>
           </div>
           <div class="ex divider-above">
             <div class="num">3</div>
@@ -1048,8 +1152,7 @@
                   placeholder="—" data-key="d2-bss-w"></div>
               <div class="ex-input-wrap"><span class="ex-input-label">reps</span><input class="ex-input" type="text"
                   placeholder="—" data-key="d2-bss-r"></div>
-            </div>
-            <span class="tag tag-legs">Legs</span>
+            </div><span class="tag tag-legs">Legs</span>
           </div>
           <div class="ex">
             <div class="num">4</div>
@@ -1063,7 +1166,12 @@
               <div class="ex-input-wrap"><span class="ex-input-label">reps</span><input class="ex-input" type="text"
                   placeholder="—" data-key="d2-ht-r"></div>
             </div>
-            <span class="tag tag-glutes">Glutes</span>
+            <div class="ex-inputs">
+              <div class="ex-input-wrap"><span class="ex-input-label">lb</span><input class="ex-input" type="text"
+                  placeholder="—" data-key="d3-ht-w"></div>
+              <div class="ex-input-wrap"><span class="ex-input-label">reps</span><input class="ex-input" type="text"
+                  placeholder="—" data-key="d3-ht-r"></div>
+            </div><span class="tag tag-glutes">Glutes</span>
           </div>
           <div class="ex divider-above">
             <div class="num">5</div>
@@ -1077,19 +1185,18 @@
               <div class="ex-input-wrap"><span class="ex-input-label">reps</span><input class="ex-input" type="text"
                   placeholder="—" data-key="d2-row-r"></div>
             </div>
-            <span class="tag tag-pull">Pull</span>
+            <div class="ex-inputs">
+              <div class="ex-input-wrap"><span class="ex-input-label">lb</span><input class="ex-input" type="text"
+                  placeholder="—" data-key="d3-row-w"></div>
+              <div class="ex-input-wrap"><span class="ex-input-label">reps</span><input class="ex-input" type="text"
+                  placeholder="—" data-key="d3-row-r"></div>
+            </div><span class="tag tag-pull">Pull</span>
           </div>
           <div class="ex">
             <div class="num">6</div>
             <div class="ex-info">
               <div class="ex-name">Lateral raise</div>
               <div class="ex-sets">3 × 15–20</div>
-            </div>
-            <div class="ex-inputs">
-              <div class="ex-input-wrap"><span class="ex-input-label">lb</span><input class="ex-input" type="text"
-                  placeholder="—" data-key="d2-lat-w"></div>
-              <div class="ex-input-wrap"><span class="ex-input-label">reps</span><input class="ex-input" type="text"
-                  placeholder="—" data-key="d2-lat-r"></div>
             </div>
             <span class="tag tag-shoulder">Shoulder</span>
           </div>
@@ -1104,8 +1211,7 @@
                   placeholder="—" data-key="d2-dead-w"></div>
               <div class="ex-input-wrap"><span class="ex-input-label">reps</span><input class="ex-input" type="text"
                   placeholder="—" data-key="d2-dead-r"></div>
-            </div>
-            <span class="tag tag-core">Core</span>
+            </div><span class="tag tag-core">Core</span>
           </div>
         </div>
       </div>
@@ -1124,12 +1230,6 @@
               <div class="ex-name">Assisted pull-up</div>
               <div class="ex-sets">4 × 8–10</div>
             </div>
-            <div class="ex-inputs">
-              <div class="ex-input-wrap"><span class="ex-input-label">assist</span><input class="ex-input" type="text"
-                  placeholder="—" data-key="d3-pullup-w"></div>
-              <div class="ex-input-wrap"><span class="ex-input-label">reps</span><input class="ex-input" type="text"
-                  placeholder="—" data-key="d3-pullup-r"></div>
-            </div>
             <span class="tag tag-pull">Pull</span>
           </div>
           <div class="ex">
@@ -1137,12 +1237,6 @@
             <div class="ex-info">
               <div class="ex-name">Cable row</div>
               <div class="ex-sets">4 × 8–10</div>
-            </div>
-            <div class="ex-inputs">
-              <div class="ex-input-wrap"><span class="ex-input-label">lb</span><input class="ex-input" type="text"
-                  placeholder="—" data-key="d3-row-w"></div>
-              <div class="ex-input-wrap"><span class="ex-input-label">reps</span><input class="ex-input" type="text"
-                  placeholder="—" data-key="d3-row-r"></div>
             </div>
             <span class="tag tag-pull">Pull</span>
           </div>
@@ -1152,12 +1246,6 @@
               <div class="ex-name">Romanian deadlift</div>
               <div class="ex-sets">3 × 8–10</div>
             </div>
-            <div class="ex-inputs">
-              <div class="ex-input-wrap"><span class="ex-input-label">lb</span><input class="ex-input" type="text"
-                  placeholder="—" data-key="d3-rdl-w"></div>
-              <div class="ex-input-wrap"><span class="ex-input-label">reps</span><input class="ex-input" type="text"
-                  placeholder="—" data-key="d3-rdl-r"></div>
-            </div>
             <span class="tag tag-legs">Legs</span>
           </div>
           <div class="ex">
@@ -1165,12 +1253,6 @@
             <div class="ex-info">
               <div class="ex-name">Hip thrusts</div>
               <div class="ex-sets">3 × 10–12</div>
-            </div>
-            <div class="ex-inputs">
-              <div class="ex-input-wrap"><span class="ex-input-label">lb</span><input class="ex-input" type="text"
-                  placeholder="—" data-key="d3-ht-w"></div>
-              <div class="ex-input-wrap"><span class="ex-input-label">reps</span><input class="ex-input" type="text"
-                  placeholder="—" data-key="d3-ht-r"></div>
             </div>
             <span class="tag tag-glutes">Glutes</span>
           </div>
@@ -1180,12 +1262,6 @@
               <div class="ex-name">Rear delt fly</div>
               <div class="ex-sets">3 × 15–20</div>
             </div>
-            <div class="ex-inputs">
-              <div class="ex-input-wrap"><span class="ex-input-label">lb</span><input class="ex-input" type="text"
-                  placeholder="—" data-key="d3-rdf-w"></div>
-              <div class="ex-input-wrap"><span class="ex-input-label">reps</span><input class="ex-input" type="text"
-                  placeholder="—" data-key="d3-rdf-r"></div>
-            </div>
             <span class="tag tag-shoulder">Shoulder</span>
           </div>
           <div class="ex">
@@ -1193,12 +1269,6 @@
             <div class="ex-info">
               <div class="ex-name">Lateral raise</div>
               <div class="ex-sets">3 × 15–20</div>
-            </div>
-            <div class="ex-inputs">
-              <div class="ex-input-wrap"><span class="ex-input-label">lb</span><input class="ex-input" type="text"
-                  placeholder="—" data-key="d3-lat-w"></div>
-              <div class="ex-input-wrap"><span class="ex-input-label">reps</span><input class="ex-input" type="text"
-                  placeholder="—" data-key="d3-lat-r"></div>
             </div>
             <span class="tag tag-shoulder">Shoulder</span>
           </div>
@@ -1213,19 +1283,12 @@
                   placeholder="—" data-key="d3-pallof-w"></div>
               <div class="ex-input-wrap"><span class="ex-input-label">reps</span><input class="ex-input" type="text"
                   placeholder="—" data-key="d3-pallof-r"></div>
-            </div>
-            <span class="tag tag-core">Core</span>
+            </div><span class="tag tag-core">Core</span>
           </div>
         </div>
       </div>
 
     </div>
-
-    <div class="tracker-actions">
-      <button class="clear-btn" onclick="clearAll()">Clear all</button>
-      <button class="save-btn" onclick="saveAll()">Save</button>
-    </div>
-    <div class="save-confirm" id="save-confirm">Saved!</div>
 
     <!-- Progress milestones (interactive) -->
     <div class="metrics-section">
@@ -1420,17 +1483,74 @@
     </div>
 
 
+    <div class="tracker-actions" style="margin-top:16px;margin-bottom:8px;">
+      <button class="clear-btn" onclick="clearAll()">Clear all</button>
+      <button class="save-btn" onclick="saveAll()">Save</button>
+    </div>
+    <div class="save-confirm" id="save-confirm">Saved!</div>
 
-
-
-  </div>
+  </div><!-- end main-content -->
 
   <script>
-    const STORAGE_KEY = 'workout-tracker-v1';
     const JSONBIN_API_KEY = '$2a$10$HnKZKhKuZ.bIfjsmF/Ps5OJ5vnidFVCJqYK0mU8HB3lmVtP/REbxq';
     const JSONBIN_BASE = 'https://api.jsonbin.io/v3/b';
-    let BIN_ID = localStorage.getItem('jsonbin-bin-id') || null;
 
+    // Current user state — set on login
+    let currentUserId = null;
+    let currentEmail = null;
+
+    // Per-user helpers: each Google user gets their own bin ID stored under their unique Google ID
+    function getUserBinId() {
+      return localStorage.getItem(`jsonbin-bin-${currentUserId}`) || null;
+    }
+    function setUserBinId(id) {
+      localStorage.setItem(`jsonbin-bin-${currentUserId}`, id);
+    }
+    function getUserLocalKey() {
+      return `workout-tracker-${currentUserId}`;
+    }
+
+    // --- Google Auth ---
+
+    function handleCredential(response) {
+      const payload = JSON.parse(atob(response.credential.split('.')[1]));
+      currentUserId = payload.sub;   // Google's unique user ID (never changes)
+      currentEmail = payload.email;
+
+      sessionStorage.setItem('auth-user-id', currentUserId);
+      sessionStorage.setItem('auth-email', currentEmail);
+      showApp();
+    }
+
+    function showApp() {
+      document.getElementById('login-overlay').classList.add('hidden');
+      document.getElementById('main-content').style.display = 'block';
+      loadAll();
+    }
+
+    function signOut() {
+      currentUserId = null;
+      currentEmail = null;
+      sessionStorage.removeItem('auth-user-id');
+      sessionStorage.removeItem('auth-email');
+      // Clear inputs so next user starts fresh visually
+      document.querySelectorAll('[data-key]').forEach(el => el.value = '');
+      updateBars();
+      document.getElementById('main-content').style.display = 'none';
+      document.getElementById('login-overlay').classList.remove('hidden');
+      google.accounts.id.disableAutoSelect();
+    }
+
+    // Restore session if already signed in this browser session
+    const _sid = sessionStorage.getItem('auth-user-id');
+    const _semail = sessionStorage.getItem('auth-email');
+    if (_sid && _semail) {
+      currentUserId = _sid;
+      currentEmail = _semail;
+      showApp();
+    }
+
+    // --- Data helpers ---
 
     function collectData() {
       const data = {};
@@ -1456,6 +1576,8 @@
     }
 
     // --- JSONBin helpers ---
+    // To upgrade to Firebase: replace createBin, updateBin, fetchBin with Firebase equivalents.
+    // loadAll() and saveAll() stay exactly the same.
 
     async function createBin(data) {
       const res = await fetch(JSONBIN_BASE, {
@@ -1463,7 +1585,7 @@
         headers: {
           'Content-Type': 'application/json',
           'X-Master-Key': JSONBIN_API_KEY,
-          'X-Bin-Name': 'workout-tracker',
+          'X-Bin-Name': `workout-${currentUserId}`,
           'X-Bin-Private': 'true'
         },
         body: JSON.stringify(data)
@@ -1472,8 +1594,8 @@
       return json.metadata?.id || null;
     }
 
-    async function updateBin(data) {
-      await fetch(`${JSONBIN_BASE}/${BIN_ID}`, {
+    async function updateBin(binId, data) {
+      await fetch(`${JSONBIN_BASE}/${binId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -1483,47 +1605,53 @@
       });
     }
 
-    async function fetchBin() {
-      const res = await fetch(`${JSONBIN_BASE}/${BIN_ID}/latest`, {
+    async function fetchBin(binId) {
+      const res = await fetch(`${JSONBIN_BASE}/${binId}/latest`, {
         headers: { 'X-Master-Key': JSONBIN_API_KEY }
       });
       const json = await res.json();
       return json.record || {};
     }
 
-    // --- Core functions ---
+    // --- Core load / save ---
 
     async function loadAll() {
-      // Show local data instantly
+      const localKey = getUserLocalKey();
+      const binId = getUserBinId();
+
+      // Show this user's cached local data instantly
       try {
-        const local = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+        const local = JSON.parse(localStorage.getItem(localKey) || '{}');
         applyData(local);
       } catch (e) { }
 
-      // Then fetch from JSONBin and overwrite
-      if (BIN_ID) {
+      // Then fetch their remote data and overwrite
+      if (binId) {
         try {
-          const remote = await fetchBin();
+          const remote = await fetchBin(binId);
           applyData(remote);
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(remote));
+          localStorage.setItem(localKey, JSON.stringify(remote));
         } catch (e) {
-          console.warn('Could not load from JSONBin, using local data.');
+          console.warn('Could not reach JSONBin, showing cached data.');
         }
       }
     }
 
     async function saveAll() {
       const data = collectData();
-      // Always save locally first
-      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); } catch (e) { }
+      const localKey = getUserLocalKey();
+      let binId = getUserBinId();
 
-      // Save to JSONBin
+      // Always cache locally first
+      try { localStorage.setItem(localKey, JSON.stringify(data)); } catch (e) { }
+
+      // Push to this user's JSONBin
       try {
-        if (!BIN_ID) {
-          BIN_ID = await createBin(data);
-          if (BIN_ID) localStorage.setItem('jsonbin-bin-id', BIN_ID);
+        if (!binId) {
+          binId = await createBin(data);
+          if (binId) setUserBinId(binId);
         } else {
-          await updateBin(data);
+          await updateBin(binId, data);
         }
         flash('Saved!');
       } catch (e) {
@@ -1532,12 +1660,14 @@
     }
 
     function clearAll() {
-      if (!confirm('Clear all saved data?')) return;
+      if (!confirm('Clear all your saved data?')) return;
       document.querySelectorAll('[data-key]').forEach(el => el.value = '');
-      try { localStorage.removeItem(STORAGE_KEY); } catch (e) { }
+      try { localStorage.removeItem(getUserLocalKey()); } catch (e) { }
       saveAll();
       updateBars();
     }
+
+    // --- Progress bars ---
 
     function pct(cur, goal) {
       if (!cur || !goal || goal <= 0) return 0;
@@ -1552,7 +1682,7 @@
     function updateBars() {
       const bw = parseFloat(document.querySelector('[data-key="bm-bw-now"]')?.value) || 0;
 
-      const sqGoal = bw > 0 ? bw * 1 : null;
+      const sqGoal = bw > 0 ? bw : null;
       const sqCur = parseFloat(document.querySelector('[data-key="ms-squat-cur"]')?.value) || 0;
       document.getElementById('goal-squat').textContent = sqGoal ? `Goal: ${sqGoal} lb` : 'Goal: enter bodyweight ↓';
       setBar('bar-squat', sqGoal ? pct(sqCur, sqGoal) : 0);
@@ -1578,8 +1708,6 @@
     document.addEventListener('input', e => {
       if (e.target.dataset.key) updateBars();
     });
-
-    loadAll();
   </script>
 </body>
 
