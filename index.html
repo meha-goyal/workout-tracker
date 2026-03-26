@@ -620,7 +620,6 @@ function renderPlan() {
         <span class="ex-col-label" style="text-align:left">Exercise</span>
         <span class="ex-col-label">Sets</span>
         <span class="ex-col-label">Weight</span>
-        <span class="ex-col-label">Reps</span>
         <span class="ex-col-label">Tag / ⋯</span>
       </div>
       <div class="exercises" id="exlist-${day.id}"></div>
@@ -669,7 +668,6 @@ function renderExercises(dayId, sharedNames) {
       <input class="ex-sets-input" value="${esc(ex.sets)}" placeholder="sets" title="Edit sets/reps scheme"
         onchange="updateExSets('${dayId}','${ex.id}',this.value)">
       <input class="ex-w-input ${isShared ? 'synced' : ''}" value="${esc(td.w||'')}" placeholder="lb" data-exkey="${key}" data-field="w">
-      <input class="ex-r-input ${isShared ? 'synced' : ''}" value="${esc(td.r||'')}" placeholder="reps" data-exkey="${key}" data-field="r">
       <div class="ex-actions">
         <span class="tag tag-${ex.tag}">${ex.tag}</span>
         <button class="ex-btn" onclick="moveEx('${dayId}','${ex.id}',-1)" title="Up">↑</button>
