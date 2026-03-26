@@ -41,13 +41,13 @@
     .day-delete-btn:hover { color: rgba(255,255,255,.7); }
 
     /* Column labels */
-    .ex-col-labels { display: grid; grid-template-columns: 18px 1fr 52px 56px 56px 60px; gap: 4px; padding: 6px 10px 2px; align-items: center; }
+    .ex-col-labels { display: grid; grid-template-columns: 18px 1fr 60px 60px 52px 72px; gap: 8px; padding: 6px 10px 2px; align-items: center; }
     .ex-col-label { font-size: 8px; font-weight: 600; letter-spacing: .07em; text-transform: uppercase; color: #B4B2A9; text-align: center; }
     .ex-col-label:nth-child(2) { text-align: left; }
 
     /* Exercise rows */
     .exercises { padding: 2px 0 6px; }
-    .ex-row { display: grid; grid-template-columns: 18px 1fr 52px 56px 56px 60px; gap: 4px; padding: 5px 10px; border-bottom: 0.5px solid #F1EFE8; align-items: center; cursor: grab; }
+    .ex-row { display: grid; grid-template-columns: 18px 1fr 60px 60px 52px 72px; gap: 8px; padding: 5px 10px; border-bottom: 0.5px solid #F1EFE8; align-items: center; cursor: grab; }
     .ex-row:last-child { border-bottom: none; }
     .ex-row.dragging { opacity: .4; }
     .ex-row.drag-over { background: #F8F7F4; }
@@ -79,8 +79,11 @@
     .tag-cardio   { background: #E6FBF1; color: #085041; }
     .tag-custom   { background: #F1EFE8; color: #444441; }
 
+    /* Tag cell */
+    .ex-tag-cell { display: flex; justify-content: center; align-items: center; }
+
     /* Ex actions */
-    .ex-actions { display: flex; gap: 1px; justify-content: flex-end; }
+    .ex-actions { display: flex; gap: 1px; justify-content: flex-end; align-items: center; }
     .ex-btn { background: none; border: none; cursor: pointer; color: #D3D1C7; font-size: 12px; padding: 2px 2px; line-height: 1; transition: color .15s; }
     .ex-btn:hover { color: #888780; }
 
@@ -620,7 +623,8 @@ function renderPlan() {
         <span class="ex-col-label" style="text-align:left">Exercise</span>
         <span class="ex-col-label">Sets</span>
         <span class="ex-col-label">Weight</span>
-        <span class="ex-col-label">Tag / ⋯</span>
+        <span class="ex-col-label">Tag</span>
+        <span class="ex-col-label"></span>
       </div>
       <div class="exercises" id="exlist-${day.id}"></div>
       <div class="day-footer">
@@ -668,8 +672,10 @@ function renderExercises(dayId, sharedNames) {
       <input class="ex-sets-input" value="${esc(ex.sets)}" placeholder="sets" title="Edit sets/reps scheme"
         onchange="updateExSets('${dayId}','${ex.id}',this.value)">
       <input class="ex-w-input ${isShared ? 'synced' : ''}" value="${esc(td.w||'')}" placeholder="lb" data-exkey="${key}" data-field="w">
-      <div class="ex-actions">
+      <div class="ex-tag-cell">
         <span class="tag tag-${ex.tag}">${ex.tag}</span>
+      </div>
+      <div class="ex-actions">
         <button class="ex-btn" onclick="moveEx('${dayId}','${ex.id}',-1)" title="Up">↑</button>
         <button class="ex-btn" onclick="moveEx('${dayId}','${ex.id}',1)" title="Down">↓</button>
         <button class="ex-btn" onclick="removeEx('${dayId}','${ex.id}')" title="Remove">×</button>
